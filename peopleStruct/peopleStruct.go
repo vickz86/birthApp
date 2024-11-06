@@ -2,9 +2,12 @@ package peoplestruct
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
+
+	timeUti "github.com/vickz86/GoFunctions/timeUti"
 )
 
 // Define the People struct
@@ -51,4 +54,52 @@ func CreateBirthDate(birthString string) (time.Time, error) {
 	newDate := time.Date(yearInt, time.Month(monthInt), dayInt, 0, 0, 0, 0, time.UTC)
 
 	return newDate, nil
+}
+
+// return a new People based on input
+func CreatePeople(firstname, lastname string, birthDate time.Time) People {
+	return People{Firstname: firstname, Lastname: lastname, Birth: birthDate}
+}
+
+// PrintAge calculates and prints the age of the person, returning it as an int
+func (p People) PrintAge() int {
+	// Get the current time
+	currentTime := time.Now()
+
+	// Calculate age based on the year difference
+	age := currentTime.Year() - p.Birth.Year()
+
+	// Adjust if the birth date has not yet occurred this year
+	if currentTime.Month() < p.Birth.Month() || (currentTime.Month() == p.Birth.Month() && currentTime.Day() < p.Birth.Day()) {
+		age--
+	}
+
+	// Print the age
+	fmt.Printf("%s %s is %d years old\n", p.Firstname, p.Lastname, age)
+
+	return age
+}
+
+// TODO
+// func FormatBirthday () string*
+
+// TimeToBirthday calculates the time remaining until the next birthday.
+func (p People) TimeToBirthday() (time.Duration, int) {
+	// Set the person's birthday to the current year
+	nextBirthday := timeUti.ChangeYear(p.Birth, 0)
+
+	// If birthday has already passed this year, set it to next year
+	if !nextBirthday.After(time.Now()) {
+		nextBirthday = timeUti.ChangeYear(nextBirthday, 1)
+	}
+
+	// also return the number of days until birthday
+	timeUntil := time.Until(nextBirthday)
+
+	// get the number of days until the next birthday
+	nbDays := timeUti.DurationToDays(timeUntil)
+
+
+	// Return the duration until the next birthday
+	return timeUntil,nbDays
 }
